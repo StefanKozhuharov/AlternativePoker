@@ -42,3 +42,42 @@ int getHighCard(int cardType[3]) {
 	return temp > scoreThree ? temp : scoreThree;
 
 }
+
+int calculateScore(int hand[3]) {
+
+	int cardType[3] = { getCardType(hand[0]), getCardType(hand[1]), getCardType(hand[2]) };
+	int cardColour[3] = { getCardColour(hand[0]), getCardColour(hand[1]), getCardColour(hand[2]) };
+	if (cardType[0] == cardType[1] && cardType[1] == cardType[2] && cardType[0] != SEVEN) {
+		return getCardScore(cardType[0]) * 3;
+	}else if (cardType[0] == cardType[1] && cardType[1] == cardType[2] && cardType[0] == SEVEN) {
+		return 34;
+	}
+	else if (cardColour[0] == cardColour[1] && cardColour[1] == cardColour[2]) {
+		return getCardScore(cardType[0]) + getCardScore(cardType[1]) + getCardScore(cardType[2]);
+	}
+	else if (
+		(cardType[0] == cardType[1] && cardType[2] == SEVEN && cardColour[2] == CLUB)
+		|| (cardType[0] == cardType[2] && cardType[1] == SEVEN && cardType[1] == CLUB)
+		|| (cardType[1] == cardType[2] && cardType[0] == SEVEN && cardType[0] == CLUB)
+		) {
+		return 11 + 2 * (cardType[0] == SEVEN ? cardType[1] : cardType[0]);
+	}
+	else if (
+		(cardColour[0] == cardColour[1] && cardType[2] == SEVEN && cardColour[2] == CLUB)
+		|| (cardColour[0] == cardColour[2] && cardType[1] == SEVEN && cardColour[1] == CLUB)
+		|| (cardColour[1] == cardColour[2] && cardType[0] == SEVEN && cardColour[0] == CLUB)
+		) {
+		return getCardScore(cardType[0]) + getCardScore(cardType[1]) + getCardScore(cardType[2]) + 4;
+	}
+	else if (
+		(cardType[0] == SEVEN && cardColour[0] == CLUB)
+		|| (cardType[1] == SEVEN && cardColour[1] == CLUB)
+		|| (cardType[2] == SEVEN && cardColour[2] == CLUB)
+		) {
+		return getHighCard(cardType) + 11;
+	}
+	else {
+		getHighCard(cardType);
+	}
+
+}
