@@ -4,5 +4,6 @@
 void shuffleDeck(int* deck);
 int getCardType(int card);
 int getCardColour(int card);
+void vizualizeCard(int card);
 
 #endif
