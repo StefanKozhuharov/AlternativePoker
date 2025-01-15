@@ -18,3 +18,15 @@ int* shuffleDeck(int* deck) {
 	return deck;
 
 }
+
+int getCardType(int card) {
+
+	return card % 8;
+
+}
+
+int getCardColour(int card) {
+
+	return card / 8;
+
+}
