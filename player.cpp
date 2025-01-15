@@ -1,16 +1,7 @@
 #include <iostream>
-#include "deck.h"
 #include "constants.h"
+#include "structures.h"
 using namespace std;
-
-struct player {
-
-	int hand[3];
-	int balance = CHIP_VALUE * 100;
-	int current_bid;
-	int score;
-
-};
 
 int setPlayerCount() {
 
@@ -27,23 +18,20 @@ int setPlayerCount() {
 
 }
 
-int totalPlayers = setPlayerCount();
-player* players;
 
-void setHand() {
+player* initializePlayers(int totalPlayers) {
 
-	int* deck = shuffleDeck(cards);
+	player* players = new player[totalPlayers];
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < totalPlayers; i++) {
 
-		for (int j = 0; j < totalPlayers; j++) {
-
-			players[j].hand[i] = deck[j+i*totalPlayers];
-
-		}
+		players[i].hand[0] = NULL;
+		players[i].hand[1] = NULL;
+		players[i].hand[2] = NULL;
+		players[i].balance = CHIP_VALUE * 100;
+		players[i].current_bid = NULL;
+		players[i].score = NULL;
 
 	}
-
-	delete[] deck;
 
 }
