@@ -30,3 +30,19 @@ int setPlayerCount() {
 
 int totalPlayers = setPlayerCount();
 player* players;
+
+void setHand() {
+
+	int* deck = shuffleDeck(cards);
+
+	for (int i = 0; i < 3; i++) {
+
+		for (int j = 0; j < totalPlayers; j++) {
+
+			players[j].hand[i] = deck[j+i*totalPlayers];
+
+		}
+
+	}
+
+}
