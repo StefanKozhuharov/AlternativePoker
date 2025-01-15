@@ -5,5 +5,7 @@ extern int const timesToShuffle;
 extern int cards[32];
 
 int* shuffleDeck(int* deck);
+int getCardType(int card);
+int getCardColour(int card);
 
 #endif
