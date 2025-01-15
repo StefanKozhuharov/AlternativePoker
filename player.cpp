@@ -1,8 +1,7 @@
 #include <iostream>
 #include "deck.h"
+#include "constants.h"
 using namespace std;
-
-int const CHIP_VALUE = 10;
 
 struct player {
 
@@ -44,5 +43,7 @@ void setHand() {
 		}
 
 	}
+
+	delete[] deck;
 
 }
