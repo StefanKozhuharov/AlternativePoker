@@ -1,7 +1,7 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-extern struct player {
+struct player {
 
 	int hand[3];
 	int balance;
