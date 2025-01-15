@@ -34,4 +34,6 @@ player* initializePlayers(int totalPlayers) {
 
 	}
 
+	return players;
+
 }
