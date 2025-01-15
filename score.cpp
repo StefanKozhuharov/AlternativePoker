@@ -32,3 +32,13 @@ const int getCardScore(int card) {
 		return 0;
 
 }
+
+int getHighCard(int cardType[3]) {
+
+	int scoreOne = getCardScore(cardType[0]);
+	int scoreTwo = getCardScore(cardType[1]);
+	int scoreThree = getCardScore(cardType[2]);
+	int temp = scoreOne > scoreTwo ? scoreOne : scoreTwo;
+	return temp > scoreThree ? temp : scoreThree;
+
+}
