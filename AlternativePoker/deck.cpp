@@ -76,6 +76,8 @@ void vizualizeCard(int card) {
 	case SPADE:
 		cout << "Spades";
 		break;
+	default:
+		cout << "Something went wrong!";
 
 	}
 
