@@ -1,5 +1,6 @@
 #include "deck.h"
 #include "constants.h"
+#include "player.h"
 
 const int getCardScore(int card) {
 
@@ -79,5 +80,72 @@ int calculateScore(int hand[3]) {
 	else {
 		getHighCard(cardType);
 	}
+
+}
+
+bool* getPlayersWithHighestScore(player* players, bool* activePlayers, int totalPlayers) {
+
+	int highestScore = 0;
+	bool* highestScorePlayers = new bool[totalPlayers];
+	for (int i = 0; i < totalPlayers; i++) {
+
+		highestScorePlayers[i] = false;
+
+		if (players[i].score >= highestScore && activePlayers[i]) {
+
+			highestScore = players[i].score;
+
+		}
+
+	}
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (players[i].score == highestScore && activePlayers[i]) {
+
+			highestScorePlayers[i] = true;
+
+		}
+
+	}
+
+	return highestScorePlayers;
+
+}
+
+int getNumberOfHighestScoringPlayers(player* players, bool* activePlayers, int totalPlayers) {
+
+	int count = 0;
+	bool* highestScorePlayers = getPlayersWithHighestScore(players, activePlayers, totalPlayers);
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (highestScorePlayers[i]) {
+
+			count++;
+
+		}
+
+	}
+
+	return count;
+
+}
+
+int getHighestScoringPlayer(player* players, bool* activePlayers, int totalPlayers) {
+
+	int highestScore = 0, highestScoringPlayer = 0;
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (players[i].score > highestScore && activePlayers[i]) {
+
+			highestScore = players[i].score;
+			highestScoringPlayer = i;
+
+		}
+
+	}
+
+	return highestScoringPlayer;
 
 }

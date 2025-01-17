@@ -44,6 +44,103 @@ void startGame(int totalPlayers, player* players, int& pot) {
 
 }
 
+void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
+
+	char decision = ' ';
+	bool* winningPlayers = getPlayersWithHighestScore(players, activePlayers, totalPlayers);
+
+	int bid;
+	if ((pot / 2) % CHIP_VALUE == 0) {
+
+		bid = pot / 2;
+
+	}
+	else {
+
+		bid = pot / 2 + CHIP_VALUE / 2;
+
+	}
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		while (decision != 'y' && decision != 'Y' && decision != 'n' && decision != 'N' && !winningPlayers[i] && players[i].balance - bid >= 0) {
+
+			cout << "Player" << i << " would you like to join the tie?(y/n)" << endl;
+			cin >> decision;
+
+		}
+
+		if (decision == 'n' || decision == 'N') {
+
+			activePlayers[i] = false;
+
+		}
+
+	}
+
+	shuffleDeck(cards);
+
+	for (int i = 0; i < 3; i++) {
+
+		for (int j = 0; j < totalPlayers; j++) {
+
+			if (activePlayers[j]) {
+
+				players[j].hand[i] = cards[j + i * totalPlayers];
+
+			}
+
+		}
+
+	}
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (activePlayers[i] && winningPlayers[i]) {
+
+			players[i].score = calculateScore(players[i].hand);
+
+		}
+		else if (activePlayers[i] && !winningPlayers[i]) {
+
+			players[i].balance -= bid;
+			players[i].currentBid += bid;
+			players[i].score = calculateScore(players[i].hand);
+			pot += bid;
+
+		}
+
+	}
+
+	int highestBid = getHighestBid(players, totalPlayers, activePlayers);
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (players[i].balance - highestBid + players[i].currentBid < 0 && activePlayers[i]) {
+
+			players[i].balance = 0;
+			pot += highestBid - players[i].currentBid;
+			players[i].currentBid = highestBid;
+
+		}
+		if (players[i].balance == 0 && activePlayers[i]) {
+
+			players[i].balance += 50;
+
+		}
+
+	}
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		cout << "Player" << i + 1 << ": " << players[i].balance;
+		cout << endl;
+	}
+
+	cout << endl;
+
+}
+
 int getHighestBid(player* players, int totalPlayers, bool* activePlayers) {
 
 	int highestBid = players[0].currentBid;
@@ -181,16 +278,33 @@ void handleCommand(char command, player* players, int totalPlayers, bool* active
 
 }
 
+void endGame(player currentPlayer, int pot) {
+
+	currentPlayer.balance += pot;
+
+}
+
 int main() {
 
 	int totalPlayers = setPlayerCount();
 	player* players = initializePlayers(totalPlayers);
 	bool* activePlayers = new bool[totalPlayers];
 	int pot = 0;
+	bool isDraw = false;
 
 	while (true) {
 
-		startGame(totalPlayers, players, pot);
+		if (!isDraw) {
+
+			startGame(totalPlayers, players, pot);
+
+		}
+		else {
+
+			draw(totalPlayers, players, pot, activePlayers);
+			isDraw = false;
+
+		}
 
 		for (int i = 0; i < totalPlayers; i++) {
 
@@ -213,13 +327,24 @@ int main() {
 
 			if (getNumberOfActivePlayers(activePlayers, totalPlayers) == 1) {
 
-
+				endGame(players[i], pot);
+				break;
 
 			}
 
 			if (turnsWithoutRaise == totalPlayers - 1) {
 
-				
+				if (getNumberOfHighestScoringPlayers(players, activePlayers, totalPlayers) == 1) {
+
+					endGame(players[getHighestScoringPlayer(players, activePlayers, totalPlayers)], pot);
+
+				}
+				else {
+
+					cout << "It's a draw!" << endl;
+					isDraw = true;
+
+				}
 
 			}
 
