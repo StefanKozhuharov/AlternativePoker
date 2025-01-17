@@ -102,18 +102,39 @@ void raise(player& currentPlayer, int totalPlayers, int& pot, int highestBid, in
 
 }
 
+void fold(bool* activePlayers, int playerIndex) {
+
+	activePlayers[playerIndex] = false;
+
+}
+
 int main() {
 
 	int totalPlayers = setPlayerCount();
 	player* players = initializePlayers(totalPlayers);
+	bool* activePlayers = new bool[totalPlayers];
 	int pot = 0;
 
 	while (true) {
 
 		startGame(totalPlayers, players, pot);
+
+		for (int i = 0; i < totalPlayers; i++) {
+
+			activePlayers[i] = true;
+
+		}
+
 		int i = 0;
 
 		while (true) {
+
+			if (activePlayers[i] == false) {
+
+				i = ++i % totalPlayers;
+				continue;
+
+			}
 
 			player currentPlayer = players[i];
 			vizualizePlayerHand(currentPlayer.hand, i + 1);
@@ -133,13 +154,13 @@ int main() {
 				raise(currentPlayer, totalPlayers, pot, highestBid, lowestBalance);
 
 			}
+			else if (command == 'f' || command == 'F') {
 
-			i++;
-			if (i == totalPlayers) {
-
-				i = 0;
+				fold(activePlayers, i);
 
 			}
+
+			i = ++i % totalPlayers;
 
 		}
 
