@@ -4,5 +4,6 @@
 
 player* initializePlayers(int totalPlayers);
 int setPlayerCount();
+int getNumberOfActivePlayers(bool* activePlayers, int totalPlayers);
 
 #endif

@@ -37,3 +37,20 @@ player* initializePlayers(int totalPlayers) {
 	return players;
 
 }
+
+int getNumberOfActivePlayers(bool* activePlayers, int totalPlayers) {
+
+	int count = 0;
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (activePlayers[i]) {
+
+			count++;
+
+		}
+
+	}
+
+	return count;
+
+}

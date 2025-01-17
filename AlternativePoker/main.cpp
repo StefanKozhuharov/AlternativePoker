@@ -118,6 +118,69 @@ void call(player& currentPlayer, int& pot, int highestBid) {
 
 }
 
+char selectCommand(player currentPlayer, int highestBid) {
+
+	char command = ' ';
+
+	if (currentPlayer.balance - highestBid + currentPlayer.currentBid == 0) {
+
+		while (command != 'f' && command != 'F' && command != 'c' && command != 'C') {
+
+			cout << endl << "Enter a command: (f - fold; c - call)" << endl;
+			cin >> command;
+
+		}
+
+	}
+	else if (currentPlayer.currentBid == highestBid) {
+
+		while (command != 'r' && command != 'R' && command != 'f' && command != 'F') {
+
+			cout << endl << "Enter a command: (r - raise; f - fold)" << endl;
+			cin >> command;
+
+		}
+
+	}
+	else {
+
+		while (command != 'r' && command != 'R' && command != 'f' && command != 'F' && command != 'c' && command != 'C') {
+
+			cout << endl << "Enter a command: (r - raise; f - fold; c - call)" << endl;
+			cin >> command;
+
+		}
+
+	}
+
+	return command;
+
+}
+
+void handleCommand(char command, player* players, int totalPlayers, bool* activePlayers, int& pot, int& highestBid, int& turnsWithoutRaise, int playerIndex) {
+
+	if (command == 'r' || command == 'R') {
+
+		int lowestBalance = getLowestBalance(players, totalPlayers, activePlayers);
+		raise(players[playerIndex], pot, highestBid, lowestBalance);
+		turnsWithoutRaise = 0;
+
+	}
+	else if (command == 'f' || command == 'F') {
+
+		fold(activePlayers, playerIndex);
+		turnsWithoutRaise++;
+
+	}
+	else if (command == 'c' || command == 'C') {
+
+		call(players[playerIndex], pot, highestBid);
+		turnsWithoutRaise++;
+
+	}
+
+}
+
 int main() {
 
 	int totalPlayers = setPlayerCount();
@@ -148,9 +211,15 @@ int main() {
 
 			}
 
+			if (getNumberOfActivePlayers(activePlayers, totalPlayers) == 1) {
+
+
+
+			}
+
 			if (turnsWithoutRaise == totalPlayers - 1) {
 
-
+				
 
 			}
 
@@ -162,59 +231,8 @@ int main() {
 			cout << "Your bid: " << players[i].currentBid << endl;
 			cout << "Your balance: " << players[i].balance << endl;
 			vizualizePlayerHand(players[i].hand, i + 1);
-
-			char command = ' ';
-			
-			if (players[i].balance - highestBid + players[i].currentBid == 0) {
-
-				while (command != 'f' && command != 'F' && command != 'c' && command != 'C') {
-
-					cout << endl << "Enter a command: (f - fold; c - call)" << endl;
-					cin >> command;
-
-				}
-
-			}
-			else if (players[i].currentBid == highestBid) {
-
-				while (command != 'r' && command != 'R' && command != 'f' && command != 'F') {
-
-					cout << endl << "Enter a command: (r - raise; f - fold)" << endl;
-					cin >> command;
-
-				}
-
-			}
-			else {
-
-				while (command != 'r' && command != 'R' && command != 'f' && command != 'F' && command != 'c' && command != 'C') {
-
-					cout << endl << "Enter a command: (r - raise; f - fold; c - call)" << endl;
-					cin >> command;
-
-				}
-
-			}
-
-			if (command == 'r' || command == 'R') {
-
-				int lowestBalance = getLowestBalance(players, totalPlayers, activePlayers);
-				raise(players[i], pot, highestBid, lowestBalance);
-				turnsWithoutRaise = 0;
-
-			}
-			else if (command == 'f' || command == 'F') {
-
-				fold(activePlayers, i);
-				turnsWithoutRaise++;
-
-			}
-			else if (command == 'c' || command == 'C') {
-
-				call(players[i], pot, highestBid);
-				turnsWithoutRaise++;
-
-			}
+			char command = selectCommand(players[i], highestBid);			
+			handleCommand(command, players, totalPlayers, activePlayers, pot, highestBid, turnsWithoutRaise, i);
 
 			i = ++i % totalPlayers;
 
