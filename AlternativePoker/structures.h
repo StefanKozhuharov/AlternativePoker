@@ -5,7 +5,7 @@ struct player {
 
 	int hand[3];
 	int balance;
-	int current_bid;
+	int currentBid;
 	int score;
 
 };

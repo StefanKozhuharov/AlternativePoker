@@ -29,7 +29,7 @@ player* initializePlayers(int totalPlayers) {
 		players[i].hand[1] = NULL;
 		players[i].hand[2] = NULL;
 		players[i].balance = CHIP_VALUE * 100;
-		players[i].current_bid = NULL;
+		players[i].currentBid = NULL;
 		players[i].score = NULL;
 
 	}
