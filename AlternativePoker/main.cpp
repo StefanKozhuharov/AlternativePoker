@@ -8,6 +8,23 @@ using namespace std;
 
 int cards[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
 
+int getHighestBid(player* players, int totalPlayers, bool* activePlayers) {
+
+	int highestBid = players[0].currentBid;
+	for (int i = 1; i < totalPlayers; i++) {
+
+		if (players[i].currentBid > highestBid && activePlayers[i]) {
+
+			highestBid = players[i].currentBid;
+
+		}
+
+	}
+
+	return highestBid;
+
+}
+
 void startGame(int totalPlayers, player* players, int& pot) {
 
 	shuffleDeck(cards);
@@ -138,23 +155,6 @@ void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
 	}
 
 	cout << endl;
-
-}
-
-int getHighestBid(player* players, int totalPlayers, bool* activePlayers) {
-
-	int highestBid = players[0].currentBid;
-	for (int i = 1; i < totalPlayers; i++) {
-
-		if (players[i].currentBid > highestBid && activePlayers[i]) {
-
-			highestBid = players[i].currentBid;
-
-		}
-
-	}
-
-	return highestBid;
 
 }
 
