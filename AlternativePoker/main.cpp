@@ -26,7 +26,7 @@ int getHighestBid(player* players, int totalPlayers, bool* activePlayers) {
 
 }
 
-void startGame(int totalPlayers, player* players, int& pot) {
+void dealCards(player* players, int totalPlayers, bool* activePlayers) {
 
 	shuffleDeck(cards);
 
@@ -34,40 +34,34 @@ void startGame(int totalPlayers, player* players, int& pot) {
 
 		for (int j = 0; j < totalPlayers; j++) {
 
-			players[j].hand[i] = cards[j + i * totalPlayers];
+			if (activePlayers[j]) {
+
+				players[j].hand[i] = cards[j + i * totalPlayers];
+
+			}
 
 		}
 
 	}
 
+}
 
-	for (int i = 0; i < totalPlayers; i++) {
-
-		players[i].balance -= CHIP_VALUE;
-		players[i].currentBid = CHIP_VALUE;
-		players[i].score = calculateScore(players[i].hand);
-
-	}
-
-	pot = totalPlayers * CHIP_VALUE;
+void vizualizeBalances(player* players, int totalPlayers) {
 
 	for (int i = 0; i < totalPlayers; i++) {
 
 		cout << "Player" << i + 1 << ": " << players[i].balance;
 		cout << endl;
-
 	}
 
 	cout << endl;
 
 }
 
-void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
+void joinDrawOrNot(player* players, bool* activePlayers, int totalPlayers, int& pot, bool* winningPlayers, int& bid) {
 
 	char decision = ' ';
-	bool* winningPlayers = getPlayersWithHighestScore(players, activePlayers, totalPlayers);
 
-	int bid;
 	if ((pot / 2) % CHIP_VALUE == 0) {
 
 		bid = pot / 2;
@@ -96,21 +90,34 @@ void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
 
 	}
 
-	shuffleDeck(cards);
+}
 
-	for (int i = 0; i < 3; i++) {
+void startGame(int totalPlayers, player* players, int& pot, bool* activePlayers) {
 
-		for (int j = 0; j < totalPlayers; j++) {
+	dealCards(players, totalPlayers, activePlayers);
 
-			if (activePlayers[j]) {
+	for (int i = 0; i < totalPlayers; i++) {
 
-				players[j].hand[i] = cards[j + i * totalPlayers];
-
-			}
-
-		}
+		players[i].balance -= CHIP_VALUE;
+		players[i].currentBid = CHIP_VALUE;
+		players[i].score = calculateScore(players[i].hand);
 
 	}
+
+	pot = totalPlayers * CHIP_VALUE;
+
+	vizualizeBalances(players, totalPlayers);
+
+}
+
+void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
+
+	bool* winningPlayers = getPlayersWithHighestScore(players, activePlayers, totalPlayers);
+	int bid = 0;
+
+	joinDrawOrNot(players, activePlayers, totalPlayers, pot, winningPlayers, bid);
+
+	dealCards(players, totalPlayers, activePlayers);
 
 	for (int i = 0; i < totalPlayers; i++) {
 
@@ -149,13 +156,8 @@ void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
 
 	}
 
-	for (int i = 0; i < totalPlayers; i++) {
+	vizualizeBalances(players, totalPlayers);
 
-		cout << "Player" << i + 1 << ": " << players[i].balance;
-		cout << endl;
-	}
-
-	cout << endl;
 	delete[] winningPlayers;
 
 }
@@ -316,7 +318,7 @@ void endGame(player& currentPlayer, int currentPlayerIndex, player* players, boo
 	if (decision == 'n' || decision == 'N') {
 
 		ofstream save("save.txt");
-		save << TOTAL_PLAYERS << "\n" << totalPlayers;
+		save << TOTAL_PLAYERS << "\n" << totalPlayers << '\n';
 		for (int i = 0; i < TOTAL_PLAYERS; i++) {
 
 			save << players[i].balance << "\n";
@@ -439,6 +441,87 @@ void continueGame(int& TOTAL_PLAYERS, int& totalPlayers, player*& players) {
 
 }
 
+void vizualizeHUD(player* players, int totalPlayers, bool* activePlayers, int pot, int i, int turnsWithoutRaise) {
+
+	int highestBid = getHighestBid(players, totalPlayers, activePlayers);
+
+	cout << "Pot: " << pot << endl;
+	cout << "Highest bid: " << highestBid << endl;
+	cout << endl << "Player" << i + 1 << "'s turn" << endl;
+	cout << "Your bid: " << players[i].currentBid << endl;
+	cout << "Your balance: " << players[i].balance << endl;
+	vizualizePlayerHand(players[i].hand, i + 1);
+	char command = selectCommand(players[i], highestBid);
+	handleCommand(command, players, totalPlayers, activePlayers, pot, highestBid, turnsWithoutRaise, i);
+
+}
+
+void onePlaythrough(bool* activePlayers, player* players, int& totalPlayers, int TOTAL_PLAYERS, int& pot, bool& isDraw) {
+
+	int i = 0;
+	int turnsWithoutRaise = 0;
+
+	while (true) {
+
+		if (!activePlayers[i]) {
+
+			turnsWithoutRaise++;
+			i = ++i % totalPlayers;
+			continue;
+
+		}
+
+		if (getNumberOfActivePlayers(activePlayers, totalPlayers) == 1) {
+
+			endGame(players[i], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
+			break;
+
+		}
+
+		if (turnsWithoutRaise == totalPlayers - 1) {
+
+			if (getNumberOfHighestScoringPlayers(players, activePlayers, totalPlayers) == 1) {
+
+				endGame(players[getHighestScoringPlayer(players, activePlayers, totalPlayers)], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
+
+			}
+			else {
+
+				cout << "It's a draw!" << endl;
+				isDraw = true;
+
+			}
+
+		}
+
+		vizualizeHUD(players, totalPlayers, activePlayers, pot, i, turnsWithoutRaise);
+
+		i = ++i % totalPlayers;
+
+	}
+
+}
+
+void continueGameOrNot(bool& continuedGame, int& TOTAL_PLAYERS, int& totalPlayers, player*& players) {
+
+	char decision = ' ';
+
+	while (decision != 'y' && decision != 'Y' && decision != 'n' && decision != 'N') {
+
+		cout << "Would you like to continue your previous game?" << endl;
+		cin >> decision;
+
+	}
+
+	if (decision == 'y' || decision == 'Y') {
+
+		continuedGame = true;
+		continueGame(TOTAL_PLAYERS, totalPlayers, players);
+
+	}
+
+}
+
 int main() {
 
 	ifstream save("save.txt");
@@ -448,26 +531,11 @@ int main() {
 
 	if (!isEmpty(save)) {
 
-		char decision = ' ';
-
-		while (decision != 'y' && decision != 'Y' && decision != 'n' && decision != 'N') {
-
-			cout << "Would you like to continue your previous game?" << endl;
-			cin >> decision;
-
-		}
-
-		if (decision == 'y' || decision == 'Y') {
-
-			continuedGame = true;
-			continueGame(TOTAL_PLAYERS, totalPlayers, players);
-
-		}
+		continueGameOrNot(continuedGame, TOTAL_PLAYERS, totalPlayers, players);
 
 	}
 
 	save.close();
-
 	if (!continuedGame) {
 
 		ofstream save("save.txt");
@@ -475,6 +543,7 @@ int main() {
 		totalPlayers = setPlayerCount();
 		TOTAL_PLAYERS = totalPlayers;
 		players = initializePlayers(TOTAL_PLAYERS);
+		save.close();
 
 	}
 
@@ -484,7 +553,6 @@ int main() {
 
 	if (players == nullptr) {
 
-		cout << TOTAL_PLAYERS << " " << totalPlayers << endl;
 		return 0;
 
 	}
@@ -493,7 +561,12 @@ int main() {
 
 		if (!isDraw) {
 
-			startGame(totalPlayers, players, pot);
+			for (int i = 0; i < totalPlayers; i++) {
+
+				activePlayers[i] = true;
+
+			}
+			startGame(totalPlayers, players, pot, activePlayers);
 
 		}
 		else {
@@ -503,62 +576,7 @@ int main() {
 
 		}
 
-		for (int i = 0; i < totalPlayers; i++) {
-
-			activePlayers[i] = true;
-
-		}
-
-		int i = 0;
-		int turnsWithoutRaise = 0;
-
-		while (true) {
-
-			if (!activePlayers[i]) {
-
-				turnsWithoutRaise++;
-				i = ++i % totalPlayers;
-				continue;
-
-			}
-
-			if (getNumberOfActivePlayers(activePlayers, totalPlayers) == 1) {
-
-				endGame(players[i], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
-				break;
-
-			}
-
-			if (turnsWithoutRaise == totalPlayers - 1) {
-
-				if (getNumberOfHighestScoringPlayers(players, activePlayers, totalPlayers) == 1) {
-
-					endGame(players[getHighestScoringPlayer(players, activePlayers, totalPlayers)], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
-
-				}
-				else {
-
-					cout << "It's a draw!" << endl;
-					isDraw = true;
-
-				}
-
-			}
-
-			int highestBid = getHighestBid(players, totalPlayers, activePlayers);
-
-			cout << "Pot: " << pot << endl;
-			cout << "Highest bid: " << highestBid << endl;
-			cout << endl << "Player" << i + 1 << "'s turn" << endl;
-			cout << "Your bid: " << players[i].currentBid << endl;
-			cout << "Your balance: " << players[i].balance << endl;
-			vizualizePlayerHand(players[i].hand, i + 1);
-			char command = selectCommand(players[i], highestBid);
-			handleCommand(command, players, totalPlayers, activePlayers, pot, highestBid, turnsWithoutRaise, i);
-
-			i = ++i % totalPlayers;
-
-		}
+		onePlaythrough(activePlayers, players, totalPlayers, TOTAL_PLAYERS, pot, isDraw);
 
 	}
 
