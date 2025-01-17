@@ -1,7 +1,21 @@
+/**
+*
+* Solution to course project #10
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2023/2024
+*
+* @author Stefan Kozhuharov
+* @idnumber 9MI0600529
+* @compiler VC
+*
+* This file is made to run functions related to calculating the score of players
+*
+*/
 #include "deck.h"
 #include "constants.h"
 #include "player.h"
-
+//returns the score of a single card depending on the values given to us by the rules of the game
 const int getCardScore(int card) {
 
 	if (card == ACE) {
@@ -33,7 +47,7 @@ const int getCardScore(int card) {
 		return 0;
 
 }
-
+//returns the points our highest card gives
 int getHighCard(int cardType[3]) {
 
 	int scoreOne = getCardScore(cardType[0]);
@@ -43,7 +57,7 @@ int getHighCard(int cardType[3]) {
 	return temp > scoreThree ? temp : scoreThree;
 
 }
-
+//calculates the score of a player's hand depending on the different card combinations the game provides
 int calculateScore(int hand[3]) {
 
 	int cardType[3] = { getCardType(hand[0]), getCardType(hand[1]), getCardType(hand[2]) };
@@ -82,7 +96,7 @@ int calculateScore(int hand[3]) {
 	}
 
 }
-
+//returns which players have the highest score in the game in an array, with each index coresponding to the index of our players array
 bool* getPlayersWithHighestScore(player* players, bool* activePlayers, int totalPlayers) {
 
 	int highestScore = 0;
@@ -112,7 +126,7 @@ bool* getPlayersWithHighestScore(player* players, bool* activePlayers, int total
 	return highestScorePlayers;
 
 }
-
+//returns the number of players who have said high score
 int getNumberOfHighestScoringPlayers(player* players, bool* activePlayers, int totalPlayers) {
 
 	int count = 0;
@@ -131,7 +145,7 @@ int getNumberOfHighestScoringPlayers(player* players, bool* activePlayers, int t
 	return count;
 
 }
-
+//returns who the player with the highest score is if there is only 1 of them
 int getHighestScoringPlayer(player* players, bool* activePlayers, int totalPlayers) {
 
 	int highestScore = 0, highestScoringPlayer = 0;
