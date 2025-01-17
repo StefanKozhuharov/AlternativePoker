@@ -85,11 +85,10 @@ void vizualizeCard(int card) {
 
 void vizualizePlayerHand(int hand[3], int currentPlayer){
 
-	cout << "Player" << currentPlayer << " : ";
 	for (int i = 0; i < 3; i++) {
 
 		vizualizeCard(hand[i]);
-		cout << " ";
+		cout << endl;
 
 	}
 
