@@ -54,3 +54,35 @@ int getNumberOfActivePlayers(bool* activePlayers, int totalPlayers) {
 	return count;
 
 }
+
+void bustPlayerOut(player* players, int& totalPlayers, int bustedPlayer) {
+
+	for (int i = bustedPlayer; i < totalPlayers - 1; i++) {
+
+		player temp = players[i];
+		players[i] = players[i + 1];
+		players[i + 1] = temp;
+
+	}
+
+	totalPlayers--;
+
+}
+
+int getNumberOfBustedOutPlayers(player* players, int TOTAL_PLAYERS) {
+
+	int count = 0;
+
+	for (int i = 0; i < TOTAL_PLAYERS; i++) {
+
+		if (players[i].balance == 0) {
+
+			count++;
+
+		}
+
+	}
+
+	return count;
+
+}

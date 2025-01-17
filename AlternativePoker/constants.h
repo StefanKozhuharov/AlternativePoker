@@ -15,5 +15,6 @@ const int CLUB = 0;
 const int DIAMOND = 1;
 const int HEART = 2;
 const int SPADE = 3;
+const int MAX_SIZE_CHAR_ARRAY = 1024;
 
 #endif

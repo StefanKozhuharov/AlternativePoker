@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "player.h"
 #include "deck.h"
 #include "score.h"
@@ -52,7 +53,7 @@ void startGame(int totalPlayers, player* players, int& pot) {
 
 	for (int i = 0; i < totalPlayers; i++) {
 
-		cout << "Player" << i+1 << ": " << players[i].balance;
+		cout << "Player" << i + 1 << ": " << players[i].balance;
 		cout << endl;
 
 	}
@@ -155,6 +156,7 @@ void draw(int totalPlayers, player* players, int& pot, bool* activePlayers) {
 	}
 
 	cout << endl;
+	delete[] winningPlayers;
 
 }
 
@@ -278,19 +280,214 @@ void handleCommand(char command, player* players, int totalPlayers, bool* active
 
 }
 
-void endGame(player currentPlayer, int pot) {
+void endGame(player& currentPlayer, int currentPlayerIndex, player* players, bool* activePlayers, int pot, int& totalPlayers, int TOTAL_PLAYERS) {
 
 	currentPlayer.balance += pot;
+
+	for (int i = 0; i < totalPlayers; i++) {
+
+		if (players[i].balance == 0) {
+
+			bustPlayerOut(players, totalPlayers, i);
+
+		}
+
+	}
+
+	if (TOTAL_PLAYERS - getNumberOfBustedOutPlayers(players, TOTAL_PLAYERS) == 1) {
+
+		cout << "Player" << currentPlayerIndex << " wins!";
+		delete[] players;
+		delete[] activePlayers;
+		remove("save.txt");
+		exit(0);
+
+	}
+
+	char decision = ' ';
+
+	while (decision != 'y' && decision != 'Y' && decision != 'n' && decision != 'N') {
+
+		cout << "Would you like to play again?" << endl;
+		cin >> decision;
+
+	}
+
+	if (decision == 'n' || decision == 'N') {
+
+		ofstream save("save.txt");
+		save << TOTAL_PLAYERS << "\n" << totalPlayers;
+		for (int i = 0; i < TOTAL_PLAYERS; i++) {
+
+			save << players[i].balance << "\n";
+
+		}
+		save.close();
+
+		delete[] players;
+		delete[] activePlayers;
+		exit(0);
+
+	}
+
+}
+
+bool isEmpty(ifstream& pFile)
+{
+	return pFile.peek() == ifstream::traits_type::eof();
+}
+
+int getFileSize() {
+
+	ifstream file("save.txt");
+
+	if (!file.is_open()) {
+
+		cout << "Error";
+
+	}
+
+	char line[MAX_SIZE_CHAR_ARRAY];
+	int index = 0;
+	file.getline(line, MAX_SIZE_CHAR_ARRAY, '\0');
+
+	while (line[index] != '\0') {
+		
+		index++;
+
+	}
+
+	file.close();
+	return index+1;
+}
+
+int getRowCount() {
+
+	ifstream file("save.txt");
+
+	if (!file.is_open()) {
+
+		cout << "Error";
+
+	}
+
+	char line[MAX_SIZE_CHAR_ARRAY];
+	int index = 0;
+	int counterNewLine = 0;
+
+	file.getline(line, MAX_SIZE_CHAR_ARRAY, '\0');
+
+	while (line[index] != '\0') {
+
+		if (line[index] == '\n') {
+
+			counterNewLine++;
+
+		}
+
+		index++;
+
+	}
+
+	file.close();
+	counterNewLine++;
+	return counterNewLine;
+}
+
+void continueGame(int& TOTAL_PLAYERS, int& totalPlayers, player*& players) {
+
+	ifstream save("save.txt");
+	int length = getFileSize();
+	char* text = new char[length];
+	save.getline(text, length, '\0');
+	int rowCount = getRowCount();
+	int currentRow = 1;
+
+	while (*text != '\0' && currentRow != rowCount+1) {
+
+		int num = 0;
+		while (*text >= '0' && *text <= '9') {
+
+			num = num * 10 + (*text - '0');
+			text++;
+
+		}
+
+		text++;
+		if (currentRow == 1) {
+
+			TOTAL_PLAYERS = num;
+			players = initializePlayers(TOTAL_PLAYERS);
+
+		}
+		else if (currentRow == 2) {
+
+			totalPlayers = num;
+
+		}
+		else {
+
+			players[currentRow - 3].balance = num;
+
+		}
+
+		currentRow++;
+
+	}
+
+	save.close();
 
 }
 
 int main() {
 
-	int totalPlayers = setPlayerCount();
-	player* players = initializePlayers(totalPlayers);
-	bool* activePlayers = new bool[totalPlayers];
+	ifstream save("save.txt");
+	bool continuedGame = false;
+	int TOTAL_PLAYERS = 0, totalPlayers = 0;
+	player* players = nullptr;
+
+	if (!isEmpty(save)) {
+
+		char decision = ' ';
+
+		while (decision != 'y' && decision != 'Y' && decision != 'n' && decision != 'N') {
+
+			cout << "Would you like to continue your previous game?" << endl;
+			cin >> decision;
+
+		}
+
+		if (decision == 'y' || decision == 'Y') {
+
+			continuedGame = true;
+			continueGame(TOTAL_PLAYERS, totalPlayers, players);
+
+		}
+
+	}
+
+	save.close();
+
+	if (!continuedGame) {
+
+		ofstream save("save.txt");
+		save << ' ';
+		totalPlayers = setPlayerCount();
+		TOTAL_PLAYERS = totalPlayers;
+		players = initializePlayers(TOTAL_PLAYERS);
+
+	}
+
+	bool* activePlayers = new bool[TOTAL_PLAYERS];
 	int pot = 0;
 	bool isDraw = false;
+
+	if (players == nullptr) {
+
+		cout << TOTAL_PLAYERS << " " << totalPlayers << endl;
+		return 0;
+
+	}
 
 	while (true) {
 
@@ -327,7 +524,7 @@ int main() {
 
 			if (getNumberOfActivePlayers(activePlayers, totalPlayers) == 1) {
 
-				endGame(players[i], pot);
+				endGame(players[i], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
 				break;
 
 			}
@@ -336,7 +533,7 @@ int main() {
 
 				if (getNumberOfHighestScoringPlayers(players, activePlayers, totalPlayers) == 1) {
 
-					endGame(players[getHighestScoringPlayer(players, activePlayers, totalPlayers)], pot);
+					endGame(players[getHighestScoringPlayer(players, activePlayers, totalPlayers)], i, players, activePlayers, pot, totalPlayers, TOTAL_PLAYERS);
 
 				}
 				else {
@@ -356,7 +553,7 @@ int main() {
 			cout << "Your bid: " << players[i].currentBid << endl;
 			cout << "Your balance: " << players[i].balance << endl;
 			vizualizePlayerHand(players[i].hand, i + 1);
-			char command = selectCommand(players[i], highestBid);			
+			char command = selectCommand(players[i], highestBid);
 			handleCommand(command, players, totalPlayers, activePlayers, pot, highestBid, turnsWithoutRaise, i);
 
 			i = ++i % totalPlayers;
